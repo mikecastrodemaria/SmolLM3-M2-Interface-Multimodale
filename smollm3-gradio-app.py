@@ -1,7 +1,7 @@
 """
-Interface Gradio pour SmolLM3 (texte) et SmolVLM2 (vision)
-Compatible Mac, Windows et Linux avec détection automatique CPU/GPU
-Version corrigée - Bug ClearButton résolu
+Gradio Interface for SmolLM3 (text) and SmolVLM2 (vision)
+Compatible with Mac, Windows, and Linux with automatic CPU/GPU detection
+Fixed version - ClearButton bug resolved
 """
 
 import gradio as gr
@@ -13,59 +13,59 @@ import sys
 
 # Configuration
 DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-print(f"🖥️ Appareil détecté: {DEVICE}")
-print(f"💻 Système: {platform.system()} {platform.machine()}")
+print(f"🖥️ Device detected: {DEVICE}")
+print(f"💻 System: {platform.system()} {platform.machine()}")
 print(f"🐍 Python: {sys.version.split()[0]}")
 
-# Vérifier les versions
+# Check versions
 try:
     import transformers
     import gradio as gr_check
     print(f"📦 Transformers: {transformers.__version__}")
     print(f"📦 Gradio: {gr_check.__version__}")
-    
-    # Vérifier version minimale
+
+    # Check minimum version
     trans_version = tuple(map(int, transformers.__version__.split('.')[:2]))
     grad_version = tuple(map(int, gr_check.__version__.split('.')[:2]))
-    
-    if trans_version < (4, 45):
-        print("⚠️  ATTENTION: Transformers version trop ancienne!")
-        print("   Exécutez: pip install --upgrade transformers>=4.45.0")
-    
-    if grad_version < (4, 0):
-        print("⚠️  ATTENTION: Gradio version trop ancienne!")
-        print("   Exécutez: pip install --upgrade gradio>=4.0.0")
-        
-except Exception as e:
-    print(f"⚠️  Erreur lors de la vérification: {e}")
 
-# Modèles à charger
-TEXT_MODEL = "HuggingFaceTB/SmolLM3-3B"  # Version instruct (pas -Instruct dans le nom)
+    if trans_version < (4, 45):
+        print("⚠️  WARNING: Transformers version too old!")
+        print("   Run: pip install --upgrade transformers>=4.45.0")
+
+    if grad_version < (4, 0):
+        print("⚠️  WARNING: Gradio version too old!")
+        print("   Run: pip install --upgrade gradio>=4.0.0")
+
+except Exception as e:
+    print(f"⚠️  Error during version check: {e}")
+
+# Models to load
+TEXT_MODEL = "HuggingFaceTB/SmolLM3-3B"  # Instruct version (no -Instruct in the name)
 VISION_MODEL = "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
 
-# Alternative : utiliser les versions quantifiées si problème de chargement
-# TEXT_MODEL = "ggml-org/SmolLM3-3B-GGUF"  # Version quantifiée
+# Alternative: use quantized versions if loading issues
+# TEXT_MODEL = "ggml-org/SmolLM3-3B-GGUF"  # Quantized version
 # VISION_MODEL = "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
 
-# Variables globales pour les modèles
+# Global variables for models
 text_model = None
 text_tokenizer = None
 vision_model = None
 vision_processor = None
 
 def load_text_model():
-    """Charge le modèle texte SmolLM3"""
+    """Load SmolLM3 text model"""
     global text_model, text_tokenizer
-    
+
     if text_model is None:
-        print("📥 Chargement de SmolLM3-3B-Instruct...")
+        print("📥 Loading SmolLM3-3B-Instruct...")
         try:
             text_tokenizer = AutoTokenizer.from_pretrained(
                 TEXT_MODEL,
                 trust_remote_code=True
             )
-            
-            # Chargement optimisé selon le device
+
+            # Optimized loading based on device
             if DEVICE == "cuda":
                 try:
                     text_model = AutoModelForCausalLM.from_pretrained(
@@ -75,7 +75,7 @@ def load_text_model():
                         trust_remote_code=True
                     )
                 except:
-                    # Fallback sans device_map si accelerate n'est pas disponible
+                    # Fallback without device_map if accelerate is not available
                     text_model = AutoModelForCausalLM.from_pretrained(
                         TEXT_MODEL,
                         dtype=torch.float16,
@@ -93,28 +93,28 @@ def load_text_model():
                     dtype=torch.float32,
                     trust_remote_code=True
                 ).to(DEVICE)
-            
-            print("✅ SmolLM3 chargé avec succès!")
+
+            print("✅ SmolLM3 loaded successfully!")
         except Exception as e:
-            print(f"❌ Erreur lors du chargement de SmolLM3: {e}")
+            print(f"❌ Error loading SmolLM3: {e}")
             raise
-    
+
     return text_model, text_tokenizer
 
 def load_vision_model():
-    """Charge le modèle vision SmolVLM2"""
+    """Load SmolVLM2 vision model"""
     global vision_model, vision_processor
-    
+
     if vision_model is None:
-        print("📥 Chargement de SmolVLM2-2.2B-Instruct...")
+        print("📥 Loading SmolVLM2-2.2B-Instruct...")
         try:
-            # Charger le processeur avec trust_remote_code
+            # Load processor with trust_remote_code
             vision_processor = AutoProcessor.from_pretrained(
                 VISION_MODEL,
                 trust_remote_code=True
             )
-            
-            # Chargement optimisé selon le device
+
+            # Optimized loading based on device
             if DEVICE == "cuda":
                 try:
                     vision_model = AutoModelForImageTextToText.from_pretrained(
@@ -124,7 +124,7 @@ def load_vision_model():
                         trust_remote_code=True
                     )
                 except:
-                    # Fallback sans device_map si accelerate n'est pas disponible
+                    # Fallback without device_map if accelerate is not available
                     vision_model = AutoModelForImageTextToText.from_pretrained(
                         VISION_MODEL,
                         dtype=torch.float16,
@@ -142,36 +142,36 @@ def load_vision_model():
                     dtype=torch.float32,
                     trust_remote_code=True
                 ).to(DEVICE)
-            
-            print("✅ SmolVLM2 chargé avec succès!")
+
+            print("✅ SmolVLM2 loaded successfully!")
         except Exception as e:
-            print(f"❌ Erreur lors du chargement de SmolVLM2: {e}")
-            print("\n💡 Vérifiez que vous avez la bonne version:")
+            print(f"❌ Error loading SmolVLM2: {e}")
+            print("\n💡 Make sure you have the correct version:")
             print("   pip install --upgrade transformers>=4.45.0")
             raise
-    
+
     return vision_model, vision_processor
 
 def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9):
-    """Génère du texte avec SmolLM3"""
+    """Generate text with SmolLM3"""
     if not prompt or prompt.strip() == "":
-        return "⚠️ Veuillez entrer un prompt."
-    
+        return "⚠️ Please enter a prompt."
+
     try:
         model, tokenizer = load_text_model()
-        
-        # Format du prompt pour le modèle instruct
+
+        # Format prompt for instruct model
         messages = [{"role": "user", "content": prompt}]
         input_text = tokenizer.apply_chat_template(
             messages,
             tokenize=False,
             add_generation_prompt=True
         )
-        
+
         # Tokenization
         inputs = tokenizer(input_text, return_tensors="pt").to(DEVICE)
-        
-        # Génération
+
+        # Generation
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
@@ -181,11 +181,11 @@ def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9):
                 do_sample=temperature > 0,
                 pad_token_id=tokenizer.eos_token_id
             )
-        
-        # Décodage
+
+        # Decoding
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
-        # Extraire seulement la réponse de l'assistant
+
+        # Extract only the assistant's response
         if "assistant" in generated_text.lower():
             parts = generated_text.lower().split("assistant")
             if len(parts) > 1:
@@ -194,33 +194,33 @@ def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9):
                 response = generated_text
         else:
             response = generated_text.replace(input_text, "").strip()
-        
+
         return response if response else generated_text
-    
+
     except Exception as e:
         import traceback
         error_detail = traceback.format_exc()
-        print(f"Erreur complète:\n{error_detail}")
-        return f"❌ Erreur: {str(e)}\n\nVérifiez la console pour plus de détails."
+        print(f"Full error:\n{error_detail}")
+        return f"❌ Error: {str(e)}\n\nCheck the console for more details."
 
 def analyze_image(image, question, max_length=256):
-    """Analyse une image avec SmolVLM2"""
+    """Analyze an image with SmolVLM2"""
     try:
         if image is None:
-            return "⚠️ Veuillez télécharger une image."
-        
+            return "⚠️ Please upload an image."
+
         if not question or question.strip() == "":
-            return "⚠️ Veuillez poser une question sur l'image."
-        
+            return "⚠️ Please ask a question about the image."
+
         model, processor = load_vision_model()
-        
-        # Préparer l'image
+
+        # Prepare image
         if not isinstance(image, Image.Image):
             image = Image.fromarray(image).convert("RGB")
         else:
             image = image.convert("RGB")
-        
-        # Format du prompt pour SmolVLM2
+
+        # Format prompt for SmolVLM2
         messages = [
             {
                 "role": "user",
@@ -230,51 +230,51 @@ def analyze_image(image, question, max_length=256):
                 ]
             }
         ]
-        
+
         prompt = processor.apply_chat_template(messages, add_generation_prompt=True)
-        
-        # Traitement de l'image et du texte
+
+        # Process image and text
         inputs = processor(text=prompt, images=[image], return_tensors="pt")
         inputs = {k: v.to(DEVICE) for k, v in inputs.items()}
-        
-        # Génération
+
+        # Generation
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
                 max_new_tokens=max_length,
                 do_sample=False
             )
-        
-        # Décodage
+
+        # Decoding
         generated_text = processor.batch_decode(
             outputs,
             skip_special_tokens=True,
             clean_up_tokenization_spaces=False
         )[0]
-        
-        # Extraire la réponse
+
+        # Extract response
         if "Assistant:" in generated_text:
             response = generated_text.split("Assistant:")[-1].strip()
         elif question in generated_text:
             response = generated_text.split(question)[-1].strip()
         else:
             response = generated_text
-        
+
         return response if response else generated_text
-    
+
     except Exception as e:
         import traceback
         error_detail = traceback.format_exc()
-        print(f"Erreur complète:\n{error_detail}")
-        
-        # Message d'erreur détaillé pour l'utilisateur
-        error_msg = f"❌ Erreur: {str(e)}\n\n"
-        
+        print(f"Full error:\n{error_detail}")
+
+        # Detailed error message for user
+        error_msg = f"❌ Error: {str(e)}\n\n"
+
         if "Unrecognized processing class" in str(e):
-            error_msg += "💡 Solution: Mettez à jour transformers:\n"
+            error_msg += "💡 Solution: Update transformers:\n"
             error_msg += "   pip install --upgrade transformers>=4.45.0\n\n"
-        
-        error_msg += "Consultez la console pour plus de détails."
+
+        error_msg += "Check the console for more details."
         return error_msg
 
 # Interface Gradio
