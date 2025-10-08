@@ -281,27 +281,27 @@ def analyze_image(image, question, max_length=256):
 with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
     
     gr.Markdown("""
-    # 🤖 SmolLM3 & SmolVLM2 - Interface Multimodale
-    
-    Interface complète pour l'analyse de texte et d'images avec les modèles **SmolLM3** et **SmolVLM2** de HuggingFace.
-    
-    **Caractéristiques:**
-    - 💬 Mode Texte: Génération de texte avec SmolLM3-3B (version instruct)
-    - 👁️ Mode Vision: Analyse d'images avec SmolVLM2-2.2B-Instruct
-    - ⚡ Compatible CPU, GPU CUDA et Apple Silicon (MPS)
-    - 🌍 Support multilingue (EN, FR, ES, DE, IT, PT)
+    # 🤖 SmolLM3 & SmolVLM2 - Multimodal Interface
+
+    Complete interface for text analysis and image processing with **SmolLM3** and **SmolVLM2** models from HuggingFace.
+
+    **Features:**
+    - 💬 Text Mode: Text generation with SmolLM3-3B (instruct version)
+    - 👁️ Vision Mode: Image analysis with SmolVLM2-2.2B-Instruct
+    - ⚡ Compatible with CPU, CUDA GPU, and Apple Silicon (MPS)
+    - 🌍 Multilingual support (EN, FR, ES, DE, IT, PT)
     """)
     
     with gr.Tabs():
-        # Onglet Mode Texte
-        with gr.Tab("💬 Mode Texte"):
-            gr.Markdown("### Génération de texte avec SmolLM3")
+        # Text Mode Tab
+        with gr.Tab("💬 Text Mode"):
+            gr.Markdown("### Text generation with SmolLM3")
             
             with gr.Row():
                 with gr.Column():
                     text_input = gr.Textbox(
-                        label="Votre question ou prompt",
-                        placeholder="Exemple: Explique-moi la relativité en termes simples...",
+                        label="Your question or prompt",
+                        placeholder="Example: Explain relativity in simple terms...",
                         lines=5
                     )
                     
@@ -311,28 +311,28 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                             maximum=1024,
                             value=512,
                             step=50,
-                            label="Longueur maximale"
+                            label="Max Length"
                         )
                         text_temperature = gr.Slider(
                             minimum=0.1,
                             maximum=2.0,
                             value=0.7,
                             step=0.1,
-                            label="Température (créativité)"
+                            label="Temperature (creativity)"
                         )
                     
-                    text_submit = gr.Button("🚀 Générer", variant="primary")
-                
+                    text_submit = gr.Button("🚀 Generate", variant="primary")
+
                 with gr.Column():
                     text_output = gr.Textbox(
-                        label="Réponse",
+                        label="Response",
                         lines=15,
                         interactive=False
                     )
             
-            # Bouton clear APRÈS la définition des composants
+            # Clear button after component definition
             with gr.Row():
-                clear_text_btn = gr.Button("🗑️ Effacer tout")
+                clear_text_btn = gr.Button("🗑️ Clear All")
                 clear_text_btn.click(
                     fn=lambda: ("", ""),
                     inputs=[],
@@ -340,18 +340,18 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                 )
             
             gr.Markdown("""
-            **Exemples de prompts:**
-            - *"Écris une courte histoire sur un robot qui découvre l'amitié"*
-            - *"Explique le fonctionnement des réseaux de neurones"*
-            - *"Code une fonction Python pour calculer la suite de Fibonacci"*
+            **Prompt Examples:**
+            - *"Write a short story about a robot discovering friendship"*
+            - *"Explain how neural networks work"*
+            - *"Code a Python function to calculate the Fibonacci sequence"*
             """)
             
-            # Exemples prédéfinis
+            # Predefined examples
             gr.Examples(
                 examples=[
-                    ["Explique-moi la relativité générale en termes simples", 300, 0.7],
-                    ["Écris un haiku sur l'intelligence artificielle", 100, 0.9],
-                    ["Quelle est la différence entre Python et JavaScript ?", 400, 0.5],
+                    ["Explain general relativity in simple terms", 300, 0.7],
+                    ["Write a haiku about artificial intelligence", 100, 0.9],
+                    ["What is the difference between Python and JavaScript?", 400, 0.5],
                 ],
                 inputs=[text_input, text_max_length, text_temperature]
             )
@@ -362,19 +362,19 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                 outputs=text_output
             )
         
-        # Onglet Mode Vision
-        with gr.Tab("👁️ Mode Vision"):
-            gr.Markdown("### Analyse d'images avec SmolVLM2")
+        # Vision Mode Tab
+        with gr.Tab("👁️ Vision Mode"):
+            gr.Markdown("### Image analysis with SmolVLM2")
             
             with gr.Row():
                 with gr.Column():
                     vision_image = gr.Image(
                         type="pil",
-                        label="Téléchargez une image"
+                        label="Upload an image"
                     )
                     vision_question = gr.Textbox(
-                        label="Votre question sur l'image",
-                        placeholder="Exemple: Décris cette image en détail...",
+                        label="Your question about the image",
+                        placeholder="Example: Describe this image in detail...",
                         lines=3
                     )
                     vision_max_length = gr.Slider(
@@ -382,20 +382,20 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                         maximum=512,
                         value=256,
                         step=50,
-                        label="Longueur maximale de la réponse"
+                        label="Max response length"
                     )
-                    vision_submit = gr.Button("🔍 Analyser", variant="primary")
+                    vision_submit = gr.Button("🔍 Analyze", variant="primary")
                 
                 with gr.Column():
                     vision_output = gr.Textbox(
-                        label="Analyse",
+                        label="Analysis",
                         lines=15,
                         interactive=False
                     )
-            
-            # Bouton clear APRÈS la définition des composants
+
+            # Clear button after component definition
             with gr.Row():
-                clear_vision_btn = gr.Button("🗑️ Effacer tout")
+                clear_vision_btn = gr.Button("🗑️ Clear All")
                 clear_vision_btn.click(
                     fn=lambda: (None, "", ""),
                     inputs=[],
@@ -403,12 +403,12 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                 )
             
             gr.Markdown("""
-            **Capacités de SmolVLM2:**
-            - Description détaillée d'images
-            - Réponse à des questions sur le contenu visuel
-            - OCR et lecture de texte dans les images
-            - Comptage d'objets
-            - Analyse de documents et graphiques
+            **SmolVLM2 Capabilities:**
+            - Detailed image descriptions
+            - Visual question answering
+            - OCR and text reading in images
+            - Object counting
+            - Document and chart analysis
             """)
             
             vision_submit.click(
@@ -419,21 +419,21 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
     
     gr.Markdown(f"""
     ---
-    **Informations système:**
+    **System Information:**
     - Device: `{DEVICE}`
-    - Plateforme: `{platform.system()} {platform.machine()}`
+    - Platform: `{platform.system()} {platform.machine()}`
     - Python: `{sys.version.split()[0]}`
-    - Modèle texte: `{TEXT_MODEL}`
-    - Modèle vision: `{VISION_MODEL}`
-    
-    💡 **Note:** Les modèles se chargent automatiquement au premier usage de chaque mode.
-    
-    ⚠️ **En cas d'erreur:** Vérifiez que vous avez installé `transformers>=4.45.0` et `gradio>=4.0.0`
+    - Text Model: `{TEXT_MODEL}`
+    - Vision Model: `{VISION_MODEL}`
+
+    💡 **Note:** Models load automatically on first use of each mode.
+
+    ⚠️ **In case of error:** Make sure you have installed `transformers>=4.53.0` and `gradio>=4.0.0`
     """)
 
 if __name__ == "__main__":
-    print("\n🚀 Lancement de l'interface Gradio...")
-    print(f"📍 L'interface sera accessible sur: http://127.0.0.1:7860")
+    print("\n🚀 Launching Gradio interface...")
+    print(f"📍 Interface will be available at: http://127.0.0.1:7860")
     print("\n" + "="*60)
 
     demo.launch(
