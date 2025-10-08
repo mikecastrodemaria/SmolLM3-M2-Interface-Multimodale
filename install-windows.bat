@@ -85,7 +85,7 @@ echo.
 echo Installing PyTorch...
 if "%GPU_TYPE%"=="NVIDIA" (
     echo Installing PyTorch with CUDA support...
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ) else (
     echo Installing PyTorch CPU version...
     pip install torch torchvision torchaudio
@@ -97,7 +97,7 @@ echo Installing dependencies...
 pip install "transformers>=4.53.0"
 pip install "gradio>=4.0.0"
 pip install "pillow>=9.0,<11.0"
-pip install sentencepiece protobuf einops
+pip install sentencepiece protobuf einops num2words
 
 REM Verify installations
 echo.
