@@ -118,7 +118,7 @@ echo echo Starting SmolLM3 ^& SmolVLM2 Interface...
 echo echo The interface will be available at: http://localhost:7860
 echo echo.
 echo.
-echo python app.py
+echo python smollm3-gradio-app.py
 echo.
 echo pause
 ) > start.bat
@@ -130,7 +130,7 @@ echo Installation completed successfully!
 echo ========================================
 echo.
 echo Next steps:
-echo   1. Make sure app.py is in the current directory
+echo   1. Make sure smollm3-gradio-app.py is in the current directory
 echo   2. Double-click start.bat or run: start.bat
 echo   3. Open your browser at: http://localhost:7860
 echo.

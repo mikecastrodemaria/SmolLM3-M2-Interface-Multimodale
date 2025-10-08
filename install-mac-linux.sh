@@ -130,7 +130,7 @@ echo "🚀 Starting SmolLM3 & SmolVLM2 Interface..."
 echo "📍 The interface will be available at: http://localhost:7860"
 echo ""
 
-python3 app.py
+python3 smollm3-gradio-app.py
 STARTSCRIPT
 
 chmod +x start.sh
@@ -142,7 +142,7 @@ echo "✅ Installation completed successfully!"
 echo "════════════════════════════════════════"
 echo ""
 echo "📋 Next steps:"
-echo "   1. Make sure app.py is in the current directory"
+echo "   1. Make sure smollm3-gradio-app.py is in the current directory"
 echo "   2. Run: ./start.sh"
 echo "   3. Open your browser at: http://localhost:7860"
 echo ""
