@@ -433,11 +433,11 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
 
 if __name__ == "__main__":
     print("\n🚀 Lancement de l'interface Gradio...")
-    print(f"📍 L'interface sera accessible sur: http://localhost:7860")
+    print(f"📍 L'interface sera accessible sur: http://127.0.0.1:7860")
     print("\n" + "="*60)
-    
+
     demo.launch(
-        server_name="0.0.0.0",
+        server_name="127.0.0.1",
         server_port=7860,
         share=False,
         show_error=True
