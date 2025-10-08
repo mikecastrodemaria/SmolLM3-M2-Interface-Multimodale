@@ -6,7 +6,7 @@ Version corrigée - Bug ClearButton résolu
 
 import gradio as gr
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoProcessor
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoProcessor, AutoModelForImageTextToText
 from PIL import Image
 import platform
 import sys
@@ -70,7 +70,7 @@ def load_text_model():
                 try:
                     text_model = AutoModelForCausalLM.from_pretrained(
                         TEXT_MODEL,
-                        torch_dtype=torch.float16,
+                        dtype=torch.float16,
                         device_map="auto",
                         trust_remote_code=True
                     )
@@ -78,19 +78,19 @@ def load_text_model():
                     # Fallback sans device_map si accelerate n'est pas disponible
                     text_model = AutoModelForCausalLM.from_pretrained(
                         TEXT_MODEL,
-                        torch_dtype=torch.float16,
+                        dtype=torch.float16,
                         trust_remote_code=True
                     ).to(DEVICE)
             elif DEVICE == "mps":
                 text_model = AutoModelForCausalLM.from_pretrained(
                     TEXT_MODEL,
-                    torch_dtype=torch.float16,
+                    dtype=torch.float16,
                     trust_remote_code=True
                 ).to(DEVICE)
             else:
                 text_model = AutoModelForCausalLM.from_pretrained(
                     TEXT_MODEL,
-                    torch_dtype=torch.float32,
+                    dtype=torch.float32,
                     trust_remote_code=True
                 ).to(DEVICE)
             
@@ -117,29 +117,29 @@ def load_vision_model():
             # Chargement optimisé selon le device
             if DEVICE == "cuda":
                 try:
-                    vision_model = AutoModelForCausalLM.from_pretrained(
+                    vision_model = AutoModelForImageTextToText.from_pretrained(
                         VISION_MODEL,
-                        torch_dtype=torch.float16,
+                        dtype=torch.float16,
                         device_map="auto",
                         trust_remote_code=True
                     )
                 except:
                     # Fallback sans device_map si accelerate n'est pas disponible
-                    vision_model = AutoModelForCausalLM.from_pretrained(
+                    vision_model = AutoModelForImageTextToText.from_pretrained(
                         VISION_MODEL,
-                        torch_dtype=torch.float16,
+                        dtype=torch.float16,
                         trust_remote_code=True
                     ).to(DEVICE)
             elif DEVICE == "mps":
-                vision_model = AutoModelForCausalLM.from_pretrained(
+                vision_model = AutoModelForImageTextToText.from_pretrained(
                     VISION_MODEL,
-                    torch_dtype=torch.float16,
+                    dtype=torch.float16,
                     trust_remote_code=True
                 ).to(DEVICE)
             else:
-                vision_model = AutoModelForCausalLM.from_pretrained(
+                vision_model = AutoModelForImageTextToText.from_pretrained(
                     VISION_MODEL,
-                    torch_dtype=torch.float32,
+                    dtype=torch.float32,
                     trust_remote_code=True
                 ).to(DEVICE)
             

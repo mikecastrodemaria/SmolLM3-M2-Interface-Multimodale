@@ -2,6 +2,12 @@
 
 A user-friendly web interface for running [SmolLM3](https://huggingface.co/HuggingFaceTB/SmolLM3-3B) (text generation) and [SmolVLM2](https://huggingface.co/HuggingFaceTB/SmolVLM2-2.2B-Instruct) (vision analysis) models locally on your computer.
 
+> **📌 Recent Updates (2025-01)**
+> - ✅ Fixed SmolVLM2 model loading (now uses `AutoModelForImageTextToText`)
+> - ✅ Updated to use `dtype` parameter instead of deprecated `torch_dtype`
+> - ✅ Updated minimum transformers version to 4.53.0
+> - ✅ Added comprehensive troubleshooting section
+
 ## ✨ Features
 
 - 💬 **Text Generation**: Chat with SmolLM3-3B, a powerful 3B parameter language model
@@ -71,12 +77,26 @@ source venv/bin/activate
 # On Windows:
 venv\Scripts\activate
 
-# Install dependencies
+# Upgrade pip first
+pip install --upgrade pip
+
+# Install dependencies (minimum versions required)
+pip install torch>=2.0.0 torchvision>=0.15.0
+pip install transformers>=4.53.0
+pip install gradio>=4.0.0
+pip install pillow sentencepiece protobuf einops
+
+# Or install everything at once from requirements.txt
 pip install -r requirements.txt
 
 # Run the application
-python3 app.py
+python3 smollm3-gradio-app.py
 ```
+
+**Important:** Make sure you have at least:
+- `transformers>=4.53.0` (required for SmolVLM2 support)
+- `torch>=2.0.0` (required for modern PyTorch features)
+- `gradio>=4.0.0` (for the web interface)
 
 ## 📖 Usage
 
@@ -141,17 +161,31 @@ If you're running out of memory, you can reduce the maximum generation length in
 ### Issue: "Command not found: python3"
 **Solution**: Try `python` instead of `python3`, or install Python from [python.org](https://www.python.org/downloads/)
 
+### Issue: "Unrecognized configuration class SmolVLMConfig"
+**Solution**: This was fixed in the latest version. Make sure you're using the updated code with `AutoModelForImageTextToText` for SmolVLM2:
+```bash
+pip install --upgrade transformers>=4.53.0
+```
+
+### Issue: "torch_dtype is deprecated"
+**Solution**: This warning is fixed in the latest code. The parameter has been changed from `torch_dtype` to `dtype`.
+
+### Issue: "SmolVLMModel object has no attribute 'generate'"
+**Solution**: This means you're using the wrong model class. Make sure the code uses `AutoModelForImageTextToText` instead of `AutoModel` or `AutoModelForCausalLM` for SmolVLM2.
+
 ### Issue: "CUDA out of memory"
-**Solution**: 
+**Solution**:
 - Close other applications
 - Reduce the max generation length in the UI
 - Use a smaller batch size
+- Consider using `dtype=torch.float32` instead of `torch.float16`
 
 ### Issue: Models downloading very slowly
-**Solution**: 
+**Solution**:
 - Check your internet connection
 - Consider downloading models manually from HuggingFace
 - Models are cached in `~/.cache/huggingface/`
+- You can optionally install `hf_xet` for better performance: `pip install hf_xet`
 
 ### Issue: "ModuleNotFoundError" errors
 **Solution**:

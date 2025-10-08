@@ -2,6 +2,12 @@
 
 Guide complet pour installer et exécuter l'interface Gradio sur **macOS** et **Windows 11**.
 
+> **📌 Note importante (Janvier 2025)**
+> Ce guide a été mis à jour avec les dernières corrections :
+> - Utilisation de `AutoModelForImageTextToText` pour SmolVLM2
+> - Remplacement de `torch_dtype` par `dtype`
+> - Version minimale de transformers : 4.53.0
+
 ---
 
 ## 🍎 Installation sur macOS
@@ -50,11 +56,11 @@ pip install --upgrade pip
 # Installer PyTorch pour Mac (avec support MPS pour Apple Silicon)
 pip install torch torchvision torchaudio
 
-# Installer les autres dépendances
-pip install transformers>=4.53.0 gradio>=4.0.0 accelerate pillow sentencepiece protobuf
+# Installer les autres dépendances (versions minimales requises)
+pip install transformers>=4.53.0 gradio>=4.0.0 pillow sentencepiece protobuf einops
 
-# Pour optimiser les performances sur Apple Silicon
-pip install accelerate bitsandbytes
+# Optionnel: pour optimiser les performances
+pip install accelerate
 ```
 
 ### Étape 5: Télécharger et lancer l'application
@@ -68,7 +74,7 @@ nano app.py
 # curl -O https://votre-url/app.py
 
 # Lancer l'application
-python app.py
+python smollm3-gradio-app.py
 ```
 
 ### Étape 6: Accéder à l'interface
@@ -119,10 +125,11 @@ python -m pip install --upgrade pip
 # Installer PyTorch avec support CUDA
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Installer les autres dépendances
-pip install transformers>=4.53.0 gradio>=4.0.0 accelerate pillow sentencepiece protobuf
+# Installer les autres dépendances (versions minimales requises)
+pip install transformers>=4.53.0 gradio>=4.0.0 pillow sentencepiece protobuf einops
 
 # Optionnel: pour quantification et optimisation
+pip install accelerate
 pip install bitsandbytes-windows
 ```
 
@@ -135,8 +142,11 @@ python -m pip install --upgrade pip
 # Installer PyTorch version CPU
 pip install torch torchvision torchaudio
 
-# Installer les autres dépendances
-pip install transformers>=4.53.0 gradio>=4.0.0 accelerate pillow sentencepiece protobuf
+# Installer les autres dépendances (versions minimales requises)
+pip install transformers>=4.53.0 gradio>=4.0.0 pillow sentencepiece protobuf einops
+
+# Optionnel: pour les performances
+pip install accelerate
 ```
 
 ### Étape 4: Télécharger et lancer l'application
@@ -150,7 +160,7 @@ notepad app.py
 # Invoke-WebRequest -Uri "https://votre-url/app.py" -OutFile "app.py"
 
 # Lancer l'application
-python app.py
+python smollm3-gradio-app.py
 ```
 
 ### Étape 5: Accéder à l'interface
@@ -228,6 +238,21 @@ $env:TRANSFORMERS_CACHE="C:\smollm-cache"
 
 ## ❓ Dépannage
 
+### Problème: "Unrecognized configuration class SmolVLMConfig"
+**Solution:** Vous utilisez une version trop ancienne de transformers ou un mauvais modèle AutoModel.
+```bash
+# Mettre à jour transformers
+pip install --upgrade transformers>=4.53.0
+
+# Vérifier que le code utilise bien AutoModelForImageTextToText pour SmolVLM2
+```
+
+### Problème: "torch_dtype is deprecated"
+**Solution:** Ce warning a été corrigé dans la dernière version. Assurez-vous d'utiliser le code mis à jour qui utilise `dtype` au lieu de `torch_dtype`.
+
+### Problème: "SmolVLMModel object has no attribute 'generate'"
+**Solution:** Vous utilisez le mauvais AutoModel. SmolVLM2 nécessite `AutoModelForImageTextToText`, pas `AutoModel` ou `AutoModelForCausalLM`.
+
 ### Problème: "No module named 'transformers'"
 **Solution:** Assurez-vous que l'environnement virtuel est activé et réinstallez:
 ```bash
@@ -235,10 +260,11 @@ pip install transformers>=4.53.0
 ```
 
 ### Problème: "CUDA out of memory"
-**Solution:** 
+**Solution:**
 - Réduire la longueur maximale de génération
 - Utiliser la quantification 8-bit
 - Fermer les autres applications gourmandes en mémoire
+- Utiliser `dtype=torch.float32` au lieu de `torch.float16`
 
 ### Problème: Vitesse lente sur Mac M1/M2/M3
 **Solution:**
