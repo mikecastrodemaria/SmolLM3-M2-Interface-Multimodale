@@ -1,0 +1,34 @@
+# SmolLM3 & SmolVLM2 - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core ML frameworks
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Transformers and related
+transformers>=4.53.0
+tokenizers>=0.22.0
+safetensors>=0.4.3
+huggingface-hub>=0.34.0
+
+# Gradio interface
+gradio>=4.0.0
+
+# Image processing
+pillow>=9.0,<11.0
+
+# Text processing
+sentencepiece>=0.1.99
+protobuf>=3.20,<5.0
+
+# Additional utilities
+einops>=0.7.0
+numpy>=1.17
+pyyaml>=5.1
+tqdm>=4.27
+requests>=2.25.0
+
+# Optional: for better performance
+# accelerate>=0.20.0  # Uncomment if you want multi-GPU support
+# bitsandbytes>=0.41.0  # Uncomment for 8-bit quantization (Linux/Windows with CUDA only)

@@ -1,0 +1,59 @@
+@echo off
+REM SmolLM3 & SmolVLM2 - Update Script for Windows
+REM Updates all dependencies to their latest compatible versions
+
+setlocal enabledelayedexpansion
+
+echo ====================================
+echo SmolLM3 ^& SmolVLM2 - Update Script
+echo ====================================
+echo.
+
+REM Check if virtual environment exists
+if not exist venv (
+    echo ERROR: Virtual environment not found!
+    echo Please run install.bat first
+    pause
+    exit /b 1
+)
+
+REM Activate virtual environment
+echo Activating virtual environment...
+call venv\Scripts\activate.bat
+
+echo.
+echo Current versions:
+python -c "import torch, transformers, gradio; print(f'  PyTorch: {torch.__version__}'); print(f'  Transformers: {transformers.__version__}'); print(f'  Gradio: {gradio.__version__}')"
+
+echo.
+echo Updating pip...
+python -m pip install --upgrade pip setuptools wheel
+
+echo.
+echo Updating dependencies...
+pip install --upgrade torch torchvision torchaudio
+pip install --upgrade transformers gradio
+pip install --upgrade pillow sentencepiece protobuf einops
+
+echo.
+echo New versions:
+python -c "import torch, transformers, gradio; print(f'  PyTorch: {torch.__version__}'); print(f'  Transformers: {transformers.__version__}'); print(f'  Gradio: {gradio.__version__}')"
+
+echo.
+set /p CLEAR="Clear model cache to force re-download? (y/N): "
+if /i "%CLEAR%"=="y" (
+    echo Clearing model cache...
+    rmdir /s /q "%USERPROFILE%\.cache\huggingface\hub\models--HuggingFaceTB--SmolLM3-3B" 2>nul
+    rmdir /s /q "%USERPROFILE%\.cache\huggingface\hub\models--HuggingFaceTB--SmolVLM2-2.2B-Instruct" 2>nul
+    echo Cache cleared
+)
+
+echo.
+echo ====================================
+echo Update completed successfully!
+echo ====================================
+echo.
+echo Run start.bat to launch the application
+echo.
+
+pause
