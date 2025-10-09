@@ -93,7 +93,7 @@ echo "📚 Installing dependencies..."
 pip install "transformers>=4.53.0"
 pip install "gradio>=4.0.0"
 pip install "pillow>=9.0,<11.0"
-pip install sentencepiece protobuf einops
+pip install sentencepiece protobuf einops num2words
 
 # Verify installations
 echo ""
