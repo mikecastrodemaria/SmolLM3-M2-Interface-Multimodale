@@ -375,6 +375,7 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                     vision_question = gr.Textbox(
                         label="Your question about the image",
                         placeholder="Example: Describe this image in detail...",
+                        value="Describe this image and its style in a very detailed manner, follow the format of describing: what, who, where, when, how. You don't need to fill in all if they are irrelevant. Please remove What, Who, Where, When, How prefixes and make it one paragraph.",
                         lines=3
                     )
                     vision_max_length = gr.Slider(
