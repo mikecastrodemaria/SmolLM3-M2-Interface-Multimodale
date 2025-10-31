@@ -17,6 +17,8 @@ A user-friendly web interface for running [SmolLM3](https://huggingface.co/Huggi
 - 🎨 **User-Friendly Interface**: Clean Gradio web UI accessible from any browser
 - 🔒 **Privacy-First**: Runs completely locally, no data sent to external servers
 
+![SmolLM3-M2 Interface Multimodale Preview](./SmolLM3-M2-Interface-Multimodale_preview.png)
+
 ## 📋 Requirements
 
 ### Minimum Requirements
