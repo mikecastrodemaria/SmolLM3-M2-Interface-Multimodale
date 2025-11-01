@@ -237,6 +237,82 @@ def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9, think_mode
         print(f"Full error:\n{error_detail}")
         return f"❌ Error: {str(e)}\n\nCheck the console for more details.", ""
 
+def generate_chat_response(message, history, max_length=512, temperature=0.7, think_enabled=True, max_history=10):
+    """Generate chat response with conversation history"""
+    if not message or message.strip() == "":
+        return history, "", ""
+
+    try:
+        model, tokenizer = load_text_model()
+
+        # Build conversation history with system prompt
+        messages = [{"role": "system", "content": "/think" if think_enabled else "/no_think"}]
+
+        # Add conversation history (limit to last max_history exchanges)
+        for user_msg, assistant_msg in history[-(max_history):]:
+            messages.append({"role": "user", "content": user_msg})
+            messages.append({"role": "assistant", "content": assistant_msg})
+
+        # Add current message
+        messages.append({"role": "user", "content": message})
+
+        # Format with chat template
+        input_text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+
+        # Tokenization
+        inputs = tokenizer(input_text, return_tensors="pt").to(DEVICE)
+
+        # Generation
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=max_length,
+                temperature=temperature,
+                top_p=0.9,
+                do_sample=temperature > 0,
+                pad_token_id=tokenizer.eos_token_id
+            )
+
+        # Decoding
+        generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+        # Extract assistant's response
+        if "assistant" in generated_text.lower():
+            response = generated_text[generated_text.lower().rfind("assistant") + 9:].strip()
+        else:
+            response = generated_text.replace(input_text, "").strip()
+
+        # Parse thinking if enabled
+        thinking_trace = ""
+        final_answer = response
+
+        if think_enabled:
+            if "<think>" in response and "</think>" in response:
+                think_start = response.find("<think>") + len("<think>")
+                think_end = response.find("</think>")
+                thinking_trace = response[think_start:think_end].strip()
+                final_answer = response[response.find("</think>") + len("</think>"):].strip()
+        else:
+            if "<think>" in response and "</think>" in response:
+                final_answer = response[response.find("</think>") + len("</think>"):].strip()
+
+        # Update history
+        history.append((message, final_answer))
+
+        return history, "", thinking_trace
+
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"Full error:\n{error_detail}")
+        error_msg = f"❌ Error: {str(e)}"
+        history.append((message, error_msg))
+        return history, "", ""
+
 def analyze_image(image, question, max_length=256):
     """Analyze an image with SmolVLM2"""
     try:
@@ -320,7 +396,8 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
     Complete interface for text analysis and image processing with **SmolLM3** and **SmolVLM2** models from HuggingFace.
 
     **Features:**
-    - 💬 Text Mode: Text generation with SmolLM3-3B (instruct version)
+    - 💬 Text Mode: Single-turn text generation with SmolLM3-3B
+    - 🗨️ Chat Mode: Multi-turn conversations with context memory
     - 🧠 Extended Thinking: See the model's reasoning process (enabled by default)
     - 👁️ Vision Mode: Image analysis with SmolVLM2-2.2B-Instruct
     - ⚡ Compatible with CPU, CUDA GPU, and Apple Silicon (MPS)
@@ -430,7 +507,111 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                 inputs=[think_mode_checkbox],
                 outputs=[thinking_accordion]
             )
-        
+
+        # Chat Mode Tab
+        with gr.Tab("💬 Chat Mode"):
+            gr.Markdown("### Conversational chat with context memory")
+
+            with gr.Row():
+                with gr.Column(scale=3):
+                    chatbot = gr.Chatbot(
+                        label="Conversation",
+                        height=500,
+                        show_label=True
+                    )
+
+                    with gr.Row():
+                        chat_input = gr.Textbox(
+                            label="Your message",
+                            placeholder="Type your message here...",
+                            lines=2,
+                            scale=4
+                        )
+                        chat_send = gr.Button("📤 Send", variant="primary", scale=1)
+
+                    with gr.Row():
+                        chat_clear = gr.Button("🗑️ Clear Conversation")
+
+                with gr.Column(scale=1):
+                    gr.Markdown("### Settings")
+
+                    chat_max_length = gr.Slider(
+                        minimum=50,
+                        maximum=2048,
+                        value=512,
+                        step=50,
+                        label="Max Response Length"
+                    )
+
+                    chat_temperature = gr.Slider(
+                        minimum=0.1,
+                        maximum=2.0,
+                        value=0.7,
+                        step=0.1,
+                        label="Temperature"
+                    )
+
+                    chat_max_history = gr.Slider(
+                        minimum=1,
+                        maximum=20,
+                        value=10,
+                        step=1,
+                        label="Max History (exchanges)",
+                        info="Number of previous exchanges to keep in context"
+                    )
+
+                    chat_think_checkbox = gr.Checkbox(
+                        value=True,
+                        label="Enable Extended Thinking",
+                        info="Show reasoning process"
+                    )
+
+                    gr.Markdown("### Latest Thinking")
+                    chat_thinking_output = gr.Textbox(
+                        label="Reasoning Trace",
+                        lines=8,
+                        interactive=False,
+                        placeholder="The model's reasoning for the last response will appear here..."
+                    )
+
+            gr.Markdown("""
+            **💡 Chat Mode Features:**
+            - Maintains conversation context across multiple exchanges
+            - Automatically manages context window to avoid token limits
+            - Shows extended thinking process for each response
+            - Clear conversation to start fresh anytime
+
+            **Tips:**
+            - Adjust "Max History" to control how many previous messages are remembered
+            - Use Extended Thinking to understand the model's reasoning
+            - Longer max length allows for more detailed responses
+            """)
+
+            # Chat event handlers
+            def respond_and_clear(message, history, max_length, temperature, think_enabled, max_history):
+                new_history, _, thinking = generate_chat_response(
+                    message, history, max_length, temperature, think_enabled, max_history
+                )
+                return new_history, "", thinking
+
+            chat_send.click(
+                fn=respond_and_clear,
+                inputs=[chat_input, chatbot, chat_max_length, chat_temperature, chat_think_checkbox, chat_max_history],
+                outputs=[chatbot, chat_input, chat_thinking_output]
+            )
+
+            chat_input.submit(
+                fn=respond_and_clear,
+                inputs=[chat_input, chatbot, chat_max_length, chat_temperature, chat_think_checkbox, chat_max_history],
+                outputs=[chatbot, chat_input, chat_thinking_output]
+            )
+
+            chat_clear.click(
+                fn=lambda: ([], ""),
+                inputs=[],
+                outputs=[chatbot, chat_thinking_output]
+            )
+
         # Vision Mode Tab
         with gr.Tab("👁️ Vision Mode"):
             gr.Markdown("### Image analysis with SmolVLM2")

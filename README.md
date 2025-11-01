@@ -3,6 +3,7 @@
 A user-friendly web interface for running [SmolLM3](https://huggingface.co/HuggingFaceTB/SmolLM3-3B) (text generation) and [SmolVLM2](https://huggingface.co/HuggingFaceTB/SmolVLM2-2.2B-Instruct) (vision analysis) models locally on your computer.
 
 > **📌 Recent Updates (2025-01)**
+> - ✅ **NEW: Chat Mode** - Multi-turn conversations with context memory
 > - ✅ **NEW: Extended Thinking Mode** - See how the model reasons through problems
 > - ✅ Fixed SmolVLM2 model loading (now uses `AutoModelForImageTextToText`)
 > - ✅ Updated to use `dtype` parameter instead of deprecated `torch_dtype`
@@ -11,7 +12,8 @@ A user-friendly web interface for running [SmolLM3](https://huggingface.co/Huggi
 
 ## ✨ Features
 
-- 💬 **Text Generation**: Chat with SmolLM3-3B, a powerful 3B parameter language model
+- 💬 **Text Generation**: Single-turn text generation with SmolLM3-3B
+- 🗨️ **Chat Mode**: Multi-turn conversations with context memory (NEW!)
 - 🧠 **Extended Thinking Mode**: Watch the model's reasoning process in real-time (enabled by default)
 - 👁️ **Vision Analysis**: Analyze images with SmolVLM2-2.2B for descriptions, OCR, and visual Q&A
 - 🌍 **Multilingual Support**: Works with 6 languages (English, French, Spanish, German, Italian, Portuguese)
@@ -107,7 +109,8 @@ python3 smollm3-gradio-app.py
 1. **Launch the application** using `start.sh` (Mac/Linux) or `start.bat` (Windows)
 2. **Open your browser** and go to: `http://localhost:7860`
 3. **Choose a mode**:
-   - **Text Mode**: Type your question or prompt and generate responses
+   - **Text Mode**: Single-turn text generation for one-off questions
+   - **Chat Mode**: Multi-turn conversations with context memory
    - **Vision Mode**: Upload an image and ask questions about it
 
 ### Extended Thinking Mode
@@ -157,6 +160,35 @@ messages = [
 ```
 
 The interface handles this automatically when you toggle the "Enable Extended Thinking" checkbox.
+
+### Chat Mode - Conversations with Memory
+
+The new **Chat Mode** allows you to have natural, multi-turn conversations with SmolLM3 while maintaining context across exchanges.
+
+**Key Features:**
+- 💾 **Context Memory**: Keeps track of previous messages in the conversation
+- 🔄 **Configurable History**: Choose how many previous exchanges to remember (1-20, default: 10)
+- 🧠 **Thinking Traces**: View the model's reasoning for each response in the sidebar
+- 🎛️ **Adjustable Settings**: Control response length (up to 2048 tokens), temperature, and more
+- 🗑️ **Clear Conversation**: Start fresh anytime with one click
+
+**How it works:**
+1. Type your message in the chat input
+2. The model considers the conversation history when generating responses
+3. Extended Thinking shows the reasoning process in the sidebar
+4. Continue the conversation naturally with follow-up questions
+
+**Use Cases:**
+- Iterative problem-solving
+- Building on previous answers
+- Natural back-and-forth discussions
+- Debugging code with context
+- Educational tutoring sessions
+
+**Context Management:**
+- The "Max History" slider controls how many recent exchanges are kept in memory
+- Older messages are automatically removed to prevent context overflow
+- SmolLM3 supports up to 64K tokens, giving you room for lengthy conversations
 
 ### First Launch
 

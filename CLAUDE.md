@@ -30,7 +30,7 @@ This is a Gradio-based web interface for running HuggingFace's SmolLM3 (text gen
 
 ### Gradio Interface Structure
 
-**Two-Tab Layout:**
+**Three-Tab Layout:**
 1. **Text Mode** (`💬 Text Mode`):
    - Textbox input with examples
    - Sliders for max_length (50-1024) and temperature (0.1-2.0)
@@ -39,18 +39,35 @@ This is a Gradio-based web interface for running HuggingFace's SmolLM3 (text gen
    - Accordion component below response shows thinking process (when `/think` mode is used)
    - Clear button to reset inputs/outputs (3 outputs: input, answer, thinking)
 
-2. **Vision Mode** (`👁️ Vision Mode`):
+2. **Chat Mode** (`💬 Chat Mode`):
+   - Chatbot component for conversation display
+   - Message input with send button
+   - Context memory (configurable 1-20 exchanges, default: 10)
+   - Higher max length (50-2048 tokens)
+   - Sidebar with settings and latest thinking trace
+   - Clear conversation button
+
+3. **Vision Mode** (`👁️ Vision Mode`):
    - Image upload component (PIL type)
    - Question textbox with default prompt
    - Max length slider (50-512)
    - Clear button to reset all fields
 
 **Extended Thinking Feature:**
-- The `generate_text()` function now returns a tuple: `(final_answer, thinking_trace)`
-- When `/think` mode is enabled, the function looks for `<think>...</think>` tags in the response
-- Thinking content is extracted and displayed in a collapsible Accordion below the main answer
-- The accordion is labeled "🧠 Thinking Process" and is closed by default
+- The `generate_text()` function returns a tuple: `(final_answer, thinking_trace)`
+- The `generate_chat_response()` function returns: `(updated_history, "", thinking_trace)`
+- When `/think` mode is enabled, functions look for `<think>...</think>` tags in the response
+- Thinking content is extracted and displayed separately from the final answer
+- In Text Mode: Shown in collapsible Accordion below response
+- In Chat Mode: Shown in sidebar "Latest Thinking" textbox
 - If no thinking tags are found, only the main answer is shown
+
+**Chat Mode Implementation:**
+- `generate_chat_response()` maintains conversation history
+- Builds message array with system prompt + conversation history + new message
+- Uses sliding window approach: keeps last N exchanges (configurable via `max_history` parameter)
+- Returns updated history, empty string (for clearing input), and thinking trace
+- History format: List of tuples `[(user_msg, assistant_msg), ...]`
 
 **UI Components Pattern:**
 - Components are defined within context managers (`with gr.Row()`, `with gr.Column()`)

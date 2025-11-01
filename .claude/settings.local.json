@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix SmolVLM2 loading and update documentation\n\nThis commit fixes critical bugs and updates all documentation:\n\n**Bug Fixes:**\n- Fix SmolVLM2 model loading: Use AutoModelForImageTextToText instead of AutoModelForCausalLM\n- Fix deprecated torch_dtype parameter: Replace with dtype throughout the code\n- Resolve \"SmolVLMModel object has no attribute 'generate'\" error\n\n**Dependencies:**\n- Update minimum transformers version: 4.45.0 → 4.53.0\n- Add einops to dependencies\n- Clarify optional dependencies (accelerate, hf_xet)\n\n**Documentation:**\n- Add \"Recent Updates\" section to README\n- Expand troubleshooting with SmolVLM2-specific errors\n- Update installation-guide.md with correct versions\n- Add comprehensive CHANGELOG.md\n- Fix app filename references: app.py → smollm3-gradio-app.py\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix script filenames: app.py → smollm3-gradio-app.py\n\nUpdated all startup and installation scripts to use the correct filename.\n\n**Files updated:**\n- start.bat: Fix Python script name\n- install-windows.bat: Update generated start.bat and instructions\n- install-mac-linux.sh: Update generated start.sh and instructions\n\nThis fixes the error:\n\"python: can't open file 'app.py ': [Errno 2] No such file or directory\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(start.bat)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
