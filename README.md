@@ -127,6 +127,37 @@ SmolLM3 now features **Extended Thinking Mode**, which shows you how the model r
 - **Response**: The clear, final explanation
 - **Thinking Process** (in accordion): The model's step-by-step reasoning, breaking down the concept
 
+#### Technical Details: `/think` and `/no_think` System Prompts
+
+SmolLM3 uses special system prompts to control the extended thinking feature:
+
+- **`/think`** (default): Enables extended thinking mode
+  - Model generates reasoning within `<think>...</think>` tags
+  - Final answer appears after the thinking process
+  - Useful for complex problems, debugging, and educational purposes
+
+- **`/no_think`**: Disables extended thinking mode
+  - Model generates direct answers without showing reasoning
+  - Faster responses
+  - Better for simple queries or when you just need the answer
+
+**Usage in code:**
+```python
+# With extended thinking (default)
+messages = [
+    {"role": "system", "content": "/think"},
+    {"role": "user", "content": "Your question here"}
+]
+
+# Without extended thinking (faster)
+messages = [
+    {"role": "system", "content": "/no_think"},
+    {"role": "user", "content": "Your question here"}
+]
+```
+
+The interface handles this automatically when you toggle the "Enable Extended Thinking" checkbox.
+
 ### First Launch
 
 ⏱️ **Important**: The first launch will download ~10 GB of model files. This takes 15-20 minutes depending on your internet connection. Subsequent launches are instant as models are cached.
