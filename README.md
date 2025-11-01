@@ -3,6 +3,7 @@
 A user-friendly web interface for running [SmolLM3](https://huggingface.co/HuggingFaceTB/SmolLM3-3B) (text generation) and [SmolVLM2](https://huggingface.co/HuggingFaceTB/SmolVLM2-2.2B-Instruct) (vision analysis) models locally on your computer.
 
 > **📌 Recent Updates (2025-01)**
+> - ✅ **NEW: Extended Thinking Mode** - See how the model reasons through problems
 > - ✅ Fixed SmolVLM2 model loading (now uses `AutoModelForImageTextToText`)
 > - ✅ Updated to use `dtype` parameter instead of deprecated `torch_dtype`
 > - ✅ Updated minimum transformers version to 4.53.0
@@ -11,6 +12,7 @@ A user-friendly web interface for running [SmolLM3](https://huggingface.co/Huggi
 ## ✨ Features
 
 - 💬 **Text Generation**: Chat with SmolLM3-3B, a powerful 3B parameter language model
+- 🧠 **Extended Thinking Mode**: Watch the model's reasoning process in real-time (enabled by default)
 - 👁️ **Vision Analysis**: Analyze images with SmolVLM2-2.2B for descriptions, OCR, and visual Q&A
 - 🌍 **Multilingual Support**: Works with 6 languages (English, French, Spanish, German, Italian, Portuguese)
 - ⚡ **Hardware Acceleration**: Automatic support for CUDA (NVIDIA), MPS (Apple Silicon), or CPU
@@ -107,6 +109,23 @@ python3 smollm3-gradio-app.py
 3. **Choose a mode**:
    - **Text Mode**: Type your question or prompt and generate responses
    - **Vision Mode**: Upload an image and ask questions about it
+
+### Extended Thinking Mode
+
+SmolLM3 now features **Extended Thinking Mode**, which shows you how the model reasons through problems before giving the final answer.
+
+- **Enabled by default**: The "Enable Extended Thinking" checkbox is checked when you start
+- **How it works**: The model's internal reasoning appears in an expandable "🧠 Thinking Process" section below the response
+- **Toggle anytime**: Simply check/uncheck the box to enable or disable this feature
+- **Benefits**:
+  - Understand how the model arrived at its answer
+  - Verify the reasoning process
+  - Educational insight into AI decision-making
+  - Useful for debugging complex queries
+
+**Example**: When you ask "Explain quantum entanglement", you'll see:
+- **Response**: The clear, final explanation
+- **Thinking Process** (in accordion): The model's step-by-step reasoning, breaking down the concept
 
 ### First Launch
 
@@ -211,6 +230,7 @@ pip install -r requirements.txt
 - **Parameters**: 3 billion
 - **Context Length**: 64K tokens (up to 128K with YARN)
 - **Languages**: EN, FR, ES, DE, IT, PT
+- **Extended Thinking**: Supports `/think` and `/no_think` system prompts for reasoning traces
 - **License**: Apache 2.0
 - **Source**: [HuggingFace](https://huggingface.co/HuggingFaceTB/SmolLM3-3B)
 

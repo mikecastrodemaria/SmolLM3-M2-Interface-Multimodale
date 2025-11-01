@@ -152,16 +152,22 @@ def load_vision_model():
 
     return vision_model, vision_processor
 
-def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9):
-    """Generate text with SmolLM3"""
+def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9, think_mode="/think"):
+    """Generate text with SmolLM3, returns (answer, thinking_trace)"""
     if not prompt or prompt.strip() == "":
-        return "⚠️ Please enter a prompt."
+        return "⚠️ Please enter a prompt.", ""
+
+    if think_mode not in ["/think", "/no_think"]:
+        think_mode = "/think"
 
     try:
         model, tokenizer = load_text_model()
 
         # Format prompt for instruct model
-        messages = [{"role": "user", "content": prompt}]
+        messages = [
+            {"role": "system", "content": think_mode},
+            {"role": "user", "content": prompt}
+        ]
         input_text = tokenizer.apply_chat_template(
             messages,
             tokenize=False,
@@ -195,13 +201,41 @@ def generate_text(prompt, max_length=512, temperature=0.7, top_p=0.9):
         else:
             response = generated_text.replace(input_text, "").strip()
 
-        return response if response else generated_text
+        # If think mode is enabled, try to separate thinking from answer
+        thinking_trace = ""
+        final_answer = response
+
+        if think_mode == "/think":
+            # Try to find the thinking tags or patterns
+            # SmolLM3 uses <think>...</think> tags for reasoning
+            if "<think>" in response and "</think>" in response:
+                # Extract thinking content (between the tags)
+                think_start = response.find("<think>") + len("<think>")
+                think_end = response.find("</think>")
+                thinking_trace = response[think_start:think_end].strip()
+                # Extract final answer (everything after </think>)
+                final_answer = response[response.find("</think>") + len("</think>"):].strip()
+            elif response:
+                # If no tags found, treat entire response as answer
+                final_answer = response
+                thinking_trace = ""
+        else:
+            # If /no_think mode, remove any thinking tags if they appear
+            if "<think>" in response and "</think>" in response:
+                # Extract only the final answer (after </think>)
+                final_answer = response[response.find("</think>") + len("</think>"):].strip()
+                thinking_trace = ""
+            else:
+                final_answer = response
+                thinking_trace = ""
+
+        return final_answer if final_answer else response, thinking_trace
 
     except Exception as e:
         import traceback
         error_detail = traceback.format_exc()
         print(f"Full error:\n{error_detail}")
-        return f"❌ Error: {str(e)}\n\nCheck the console for more details."
+        return f"❌ Error: {str(e)}\n\nCheck the console for more details.", ""
 
 def analyze_image(image, question, max_length=256):
     """Analyze an image with SmolVLM2"""
@@ -287,6 +321,7 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
 
     **Features:**
     - 💬 Text Mode: Text generation with SmolLM3-3B (instruct version)
+    - 🧠 Extended Thinking: See the model's reasoning process (enabled by default)
     - 👁️ Vision Mode: Image analysis with SmolVLM2-2.2B-Instruct
     - ⚡ Compatible with CPU, CUDA GPU, and Apple Silicon (MPS)
     - 🌍 Multilingual support (EN, FR, ES, DE, IT, PT)
@@ -321,6 +356,13 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                             label="Temperature (creativity)"
                         )
                     
+                    # Add checkbox for think mode
+                    think_mode_checkbox = gr.Checkbox(
+                        value=True,
+                        label="Enable Extended Thinking",
+                        info="Show the model's reasoning process in an expandable section below the response."
+                    )
+
                     text_submit = gr.Button("🚀 Generate", variant="primary")
 
                 with gr.Column():
@@ -329,14 +371,22 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                         lines=15,
                         interactive=False
                     )
-            
+                    # Add accordion for thinking trace
+                    with gr.Accordion("🧠 Thinking Process", open=False, visible=True) as thinking_accordion:
+                        thinking_output = gr.Textbox(
+                            label="Reasoning Trace",
+                            lines=10,
+                            interactive=False,
+                            placeholder="The model's reasoning process will appear here when using Extended Thinking mode..."
+                        )
+
             # Clear button after component definition
             with gr.Row():
                 clear_text_btn = gr.Button("🗑️ Clear All")
                 clear_text_btn.click(
-                    fn=lambda: ("", ""),
+                    fn=lambda: ("", "", "", gr.Accordion(visible=False)),
                     inputs=[],
-                    outputs=[text_input, text_output]
+                    outputs=[text_input, text_output, thinking_output, thinking_accordion]
                 )
             
             gr.Markdown("""
@@ -344,6 +394,9 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
             - *"Write a short story about a robot discovering friendship"*
             - *"Explain how neural networks work"*
             - *"Code a Python function to calculate the Fibonacci sequence"*
+
+            **💡 Tip:** With Extended Thinking mode enabled (default), the model shows its reasoning process
+            in the "Thinking Process" accordion below the response. This helps you understand how it arrived at the answer!
             """)
             
             # Predefined examples
@@ -356,10 +409,26 @@ with gr.Blocks(title="SmolLM3 & SmolVLM2", theme=gr.themes.Soft()) as demo:
                 inputs=[text_input, text_max_length, text_temperature]
             )
             
+            # Function to handle generation and accordion visibility
+            def generate_and_update_visibility(prompt, max_length, temperature, think_enabled):
+                answer, thinking = generate_text(
+                    prompt, max_length, temperature, 0.9, "/think" if think_enabled else "/no_think"
+                )
+                # Show accordion only if thinking is enabled AND there's actual thinking content
+                show_accordion = think_enabled and thinking.strip() != ""
+                return answer, thinking, gr.Accordion(visible=show_accordion)
+
             text_submit.click(
-                fn=generate_text,
-                inputs=[text_input, text_max_length, text_temperature],
-                outputs=text_output
+                fn=generate_and_update_visibility,
+                inputs=[text_input, text_max_length, text_temperature, think_mode_checkbox],
+                outputs=[text_output, thinking_output, thinking_accordion]
+            )
+
+            # Also update accordion visibility when checkbox is toggled
+            think_mode_checkbox.change(
+                fn=lambda enabled: gr.Accordion(visible=enabled),
+                inputs=[think_mode_checkbox],
+                outputs=[thinking_accordion]
             )
         
         # Vision Mode Tab
